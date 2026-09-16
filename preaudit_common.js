@@ -77,8 +77,19 @@
     var i, j, m = {};
     for (i = 0; i < dst.sessions.length; i++) m[dst.sessions[i].id] = i;
     (src.sessions || []).forEach(function (s) { var k = m[s.id]; if (k == null) dst.sessions.push(s); else if ((s.ts || 0) > (dst.sessions[k].ts || 0)) dst.sessions[k] = s; });
+    /* results 做欄位級合併：自身查核與客戶查核各比各的時戳，避免一方覆蓋另一方 */
     var R = src.results || {};
-    for (var sid in R) { if (!dst.results[sid]) dst.results[sid] = {}; for (var iid in R[sid]) { var a = dst.results[sid][iid], b = R[sid][iid]; if (!a || (b.ts || 0) > (a.ts || 0)) dst.results[sid][iid] = b; } }
+    for (var sid in R) {
+      if (!dst.results[sid]) dst.results[sid] = {};
+      for (var iid in R[sid]) {
+        var a = dst.results[sid][iid], b = R[sid][iid];
+        if (!a) { dst.results[sid][iid] = b; continue; }
+        if ((b.sts || b.ts || 0) > (a.sts || a.ts || 0)) { a.r = b.r; a.note = b.note; a.by = b.by; a.sts = b.sts || b.ts; }
+        if ((b.cts || 0) > (a.cts || 0)) { a.cr = b.cr; a.cnote = b.cnote; a.cby = b.cby; a.cts = b.cts; }
+        a.ts = Math.max(a.ts || 0, b.ts || 0);
+        dst.results[sid][iid] = a;
+      }
+    }
     m = {}; for (i = 0; i < dst.findings.length; i++) m[dst.findings[i].id] = i;
     (src.findings || []).forEach(function (f) { var k = m[f.id]; if (k == null) dst.findings.push(f); else if ((f.ts || 0) > (dst.findings[k].ts || 0)) { /* 保留本機尚未上傳的照片 */ var loc = (dst.findings[k].photos || []).filter(function (p) { return p.pid && !p.url; }); dst.findings[k] = f; if (loc.length) { f.photos = (f.photos || []).concat(loc); } } });
     var C = src.custom || {};
