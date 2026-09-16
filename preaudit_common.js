@@ -45,6 +45,7 @@
     els = document.querySelectorAll('[data-pzh]');
     for (i = 0; i < els.length; i++) els[i].setAttribute('placeholder', l === 'en' ? (els[i].getAttribute('data-pen') || els[i].getAttribute('data-pzh')) : els[i].getAttribute('data-pzh'));
     var b = $('langBtn'); if (b) b.textContent = l === 'en' ? '中文' : 'EN';
+    renderStatus();                     /* 狀態列文字也要跟著換語言 */
     document.dispatchEvent(new CustomEvent('aud:lang', { detail: l }));
   }
   function by() { try { return localStorage.getItem(LS_BY) || ''; } catch (e) { return ''; } }
@@ -203,8 +204,17 @@
   function section(id) { for (var i = 0; i < BANK.sections.length; i++) if (BANK.sections[i].id === id) return BANK.sections[i]; return null; }
   function subs(sec) { var s = section(sec); return (s && s.subs) || []; }
   function items(sec) {
-    var all = BANK.items.concat(S.custom.items.filter(function (i) { return !i.del; }));
+    var all = BANK.items.concat(S.custom.items.filter(function (i) { return !i.del && !i.k; }));
     return all.filter(function (i) { return (!sec || i.sec === sec) && !(S.custom.hidden[i.id] && S.custom.hidden[i.id].h); });
+  }
+  /* TW 文件覆寫與待辦完成狀態都寄生在 custom.items（帶 k 標記），
+     這樣可以沿用既有的 id＋ts 合併邏輯，雲端 gs 不必為了新欄位改版。 */
+  function cRec(id) { for (var i = 0; i < S.custom.items.length; i++) if (S.custom.items[i].id === id) return S.custom.items[i]; return null; }
+  function cPut(id, kind, o) {
+    var r = cRec(id);
+    if (!r) { r = { id: id, k: kind }; S.custom.items.push(r); }
+    for (var x in o) r[x] = o[x];
+    r.by = by(); r.ts = now(); touch(); return r;
   }
   function item(id) { for (var i = 0; i < BANK.items.length; i++) if (BANK.items[i].id === id) return BANK.items[i]; for (i = 0; i < S.custom.items.length; i++) if (S.custom.items[i].id === id) return S.custom.items[i]; return null; }
   function secName(id) { var s = section(id); return s ? t(s.zh, s.en) : id; }
@@ -213,15 +223,22 @@
 
   /* TW 對應文件可在站上直接補填／修改，存 custom.tw（伺服器端同樣依 ts 新者勝） */
   function twDoc(iid) {
-    var o = (S.custom.tw || {})[iid];
-    if (o && o.doc != null) return { doc: o.doc, edited: true, by: o.by, ts: o.ts };
-    var it = item(iid);
+    var o = cRec('tw:' + iid), it = item(iid);
+    if (o && o.doc != null && !o.del) return { doc: o.doc, edited: true, by: o.by, ts: o.ts };
     return { doc: (it && it.tw && it.tw.doc) || '', edited: false, src: (it && it.tw && it.tw.src) || '' };
   }
-  function setTwDoc(iid, doc) {
-    if (!S.custom.tw) S.custom.tw = {};
-    S.custom.tw[iid] = { doc: doc, by: by(), ts: now() };
-    touch();
+  function setTwDoc(iid, doc) { cPut('tw:' + iid, 'tw', { doc: doc }); }
+
+  /* ── 待辦提醒（整合待辦清單 47 筆）：完成狀態全站共用，不分場次 ── */
+  function todos() { return (BANK.todos || []); }
+  function todosFor(iid) { var m = (BANK.todoByItem || {})[iid] || []; return todos().filter(function (x) { return m.indexOf(x.no) >= 0; }); }
+  function todosGeneral() { return todos().filter(function (x) { return !x.items || !x.items.length; }); }
+  function todoDone(no) { var o = cRec('todo:' + no); return o && o.done ? { done: true, by: o.by, ts: o.ts, note: o.note || '' } : null; }
+  function setTodoDone(no, done, note) { cPut('todo:' + no, 'todo', { done: !!done, note: note || '' }); }
+  function todoStat() {
+    var all = todos(), d = 0, p1 = 0, p1d = 0;
+    all.forEach(function (x) { var k = !!todoDone(x.no); if (k) d++; if (x.pri === 'P1') { p1++; if (k) p1d++; } });
+    return { total: all.length, done: d, open: all.length - d, p1: p1, p1done: p1d };
   }
 
   /* 身分模式：aces＝內部（看得到複核提醒與 TW 歷史缺失）／customer＝客戶 */
@@ -313,7 +330,8 @@
     cur: cur, setCur: setCur, liveSessions: liveSessions, newSession: newSession, saveSession: saveSession, delSession: delSession,
     sections: sections, section: section, subs: subs, items: items, item: item, secName: secName,
     histBy: histBy, history: history, BANK: BANK, REMOTE: REMOTE,
-    twDoc: twDoc, setTwDoc: setTwDoc, mode: mode, setMode: setMode, isCustomer: isCustomer, resultOf: resultOf,
+    twDoc: twDoc, setTwDoc: setTwDoc, todos: todos, todosFor: todosFor, todosGeneral: todosGeneral,
+    todoDone: todoDone, setTodoDone: setTodoDone, todoStat: todoStat, mode: mode, setMode: setMode, isCustomer: isCustomer, resultOf: resultOf,
     result: result, setResult: setResult, findings: findings, findingsFor: findingsFor, newFinding: newFinding, saveFinding: saveFinding, delFinding: delFinding,
     progress: progress, addPhoto: addPhoto, photoSrc: photoSrc, imgSrc: imgSrc, pendingPhotos: pendingPhotos, flushPhotos: flushPhotos, apiPost: apiPost, apiGet: apiGet };
 })(window);

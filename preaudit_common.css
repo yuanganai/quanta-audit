@@ -205,3 +205,35 @@ html[lang=en] .it .doc.ph.open::after,html[lang=en] .it .focus.open::after{conte
 .nabox b{display:block;font-size:14px;color:var(--navy);margin-bottom:6px}
 .nabox p{font-size:12px;line-height:1.7;margin:0 auto 14px;max-width:560px}
 @media(max-width:520px){.it .act{padding-left:0;padding-top:16px}.it .act .who{top:0;transform:none;width:auto}}
+
+/* ── 待改善事項（整合待辦清單）── */
+.dt.todoflag{background:#fde8e8;color:#b02a2a}
+.dt.todoflag.ok{background:#e4f3e7;color:#2c6b38}
+
+.todobar{background:#fff;border:1px solid #e3e8f0;border-left:4px solid #C00000;border-radius:10px;padding:8px 11px;margin-bottom:8px}
+.todobar.clear{border-left-color:#378644}
+.todobar .tbh{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.todobar .tbh b{font-size:13px;color:var(--navy)}
+.todobar .sum{font-size:11.5px;color:#6b7280;font-weight:700}
+.todobar .tbl{margin-top:8px}
+
+.it .todo,.todobar .todo{background:#fffaf9;border:1px solid #f0d6d6;border-left:3px solid #C00000;border-radius:8px;padding:6px 9px;margin-top:5px}
+.it .todo.p2,.todobar .todo.p2{border-left-color:#ED7D31;background:#fffbf6;border-color:#f3e0cc}
+.it .todo.p3,.todobar .todo.p3{border-left-color:#378644;background:#fafdfa;border-color:#dceadf}
+.it .todo.done,.todobar .todo.done{background:#f7f8fa;border-color:#e3e8f0;border-left-color:#9aa0ab;opacity:.72}
+.it .todo.done .tb,.todobar .todo.done .tb{text-decoration:line-through;text-decoration-color:#c3c8d0}
+.todo .th{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px}
+.todo .pri{font-size:10px;font-weight:800;color:#fff;background:#C00000;border-radius:7px;padding:1px 6px}
+.todo.p2 .pri{background:#ED7D31}
+.todo.p3 .pri{background:#378644}
+.todo.done .pri{background:#9aa0ab}
+.todo .th b{font-size:11.5px;color:var(--navy)}
+.todo .cl{font-size:10.5px;color:#8a8f99}
+.todo .dt2{font-size:10.5px;color:#2c6b38;font-weight:700}
+.todo .tb{font-size:11.5px;line-height:1.6;color:#4a5568;margin-top:2px}
+.todo .tb i{font-style:normal;font-weight:700;color:#b02a2a;margin-right:5px}
+.todo.p2 .tb i{color:#9a4d0d}
+.todo.p3 .tb i{color:#2c6b38}
+.todo .tb.sug i{color:#24427a}
+.todo.done .tb i{color:#9aa0ab}
+.btn.sm.green{background:#378644;color:#fff;border-color:#378644}
