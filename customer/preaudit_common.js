@@ -308,14 +308,16 @@
     var o = S.results[sid][iid] || {}, c = who === 'cust';
     if (r !== undefined) { if (c) o.cr = r; else o.r = r; }
     if (note !== undefined) { if (c) o.cnote = note; else o.note = note; }
-    if (c) { o.cts = now(); o.cby = by(); } else { o.ts = now(); o.by = by(); }
-    o.ts = o.ts || now();
+    /* ⚠️ o.ts 是「整筆最後修改時間」，伺服器 _auditMerge 只看它來判新舊 —
+       客戶側修改若不更新 o.ts，同步時會被雲端舊資料蓋掉。自身查核時間另存 o.sts。 */
+    if (c) { o.cts = now(); o.cby = by(); } else { o.sts = now(); o.by = by(); }
+    o.ts = now();
     S.results[sid][iid] = o; touch();
   }
   function resultOf(sid, iid, who) {
     var o = result(sid, iid) || {};
     return who === 'cust' ? { r: o.cr || '', note: o.cnote || '', by: o.cby || '', ts: o.cts || 0 }
-                          : { r: o.r || '', note: o.note || '', by: o.by || '', ts: o.ts || 0 };
+                          : { r: o.r || '', note: o.note || '', by: o.by || '', ts: o.sts || o.ts || 0 };
   }
   function findings(sid) { return S.findings.filter(function (f) { return !f.del && (!sid || f.sid === sid); }); }
   function findingsFor(sid, iid) { return findings(sid).filter(function (f) { return f.item === iid; }); }
