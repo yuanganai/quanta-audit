@@ -295,7 +295,11 @@
   function findSame(o) { var nm = String(o.name || '').trim(), dt = o.date || today(), pl = o.plant || 'PH'; return liveSessions().filter(function (s) { return String(s.name || '').trim() === nm && (s.date || '') === dt && (s.plant || 'PH') === pl; })[0] || null; }
   function newSession(o) {
     var ex = findSame(o); if (ex) { setCur(ex.id); return ex; }
-    var s = { id: uid('s'), name: o.name || '', plant: o.plant || 'PH', date: o.date || today(), auditors: o.auditors || '', scope: o.scope || 'all', note: o.note || '', ts: now() };
+    /* ⚠️ 預設場次用「決定性 id」（日期＋廠別），不是隨機碼 —
+       各裝置若在同步完成前先建了預設場次，隨機 id 會讓同一場稽核裂成好幾場、
+       雙方資料分別記在不同場次下（看起來像被對方蓋掉）。id 相同才會在雲端自然合併。 */
+    var did = o.auto ? ('auto-' + (o.date || today()) + '-' + (o.plant || 'PH')) : uid('s');
+    var s = { id: did, name: o.name || '', plant: o.plant || 'PH', date: o.date || today(), auditors: o.auditors || '', scope: o.scope || 'all', note: o.note || '', ts: now() };
     if (o.auto) s.auto = true;
     S.sessions.push(s); setCur(s.id); touch(); return s;
   }
