@@ -229,6 +229,37 @@
   }
   function setTwDoc(iid, doc) { cPut('tw:' + iid, 'tw', { doc: doc }); }
 
+  /* PH 自評資料：上傳新版自評表後覆寫內建題庫（原題庫保留，隨時可還原） */
+  function phDoc(iid) {
+    var o = cRec('ph:' + iid), it = item(iid);
+    if (o && !o.del && (o.doc != null || o.score != null))
+      return { doc: o.doc || '', score: o.score || '', updated: true, by: o.by, ts: o.ts };
+    return { doc: (it && it.ph && it.ph.doc) || '', score: (it && it.ph && it.ph.score) || '', updated: false };
+  }
+  function setPhDoc(iid, doc, score) { cPut('ph:' + iid, 'ph', { doc: doc, score: score }); }
+  function clearImports(kind) {
+    S.custom.items.forEach(function (x) { if (x.k === kind) { x.del = true; x.ts = now(); } });
+    touch();
+  }
+  function importStat() {
+    var n = { tw: 0, ph: 0 };
+    S.custom.items.forEach(function (x) { if (!x.del && n[x.k] != null) n[x.k]++; });
+    return n;
+  }
+
+  /* ── 匯出／匯入整包狀態（階段 2 無雲端，靠 JSON 檔交換） ── */
+  function exportState() {
+    return { app: 'quanta-audit', ver: 1, at: new Date().toISOString(), by: by(),
+             sessions: S.sessions, results: S.results, findings: S.findings, custom: S.custom };
+  }
+  function importState(o, mode) {
+    if (!o || o.app !== 'quanta-audit') return { ok: false, msg: 'not a quanta-audit backup' };
+    if (mode === 'replace') { S.sessions = o.sessions || []; S.results = o.results || {}; S.findings = o.findings || []; S.custom = o.custom || { items: [], hidden: {} }; }
+    else { mergeInto(S, { sessions: o.sessions, results: o.results, findings: o.findings, custom: o.custom }); }
+    touch();
+    return { ok: true, sessions: (o.sessions || []).length, findings: (o.findings || []).length };
+  }
+
   /* ── 待辦提醒（整合待辦清單 47 筆）：完成狀態全站共用，不分場次 ── */
   function todos() { return (BANK.todos || []); }
   function todosFor(iid) { var m = (BANK.todoByItem || {})[iid] || []; return todos().filter(function (x) { return m.indexOf(x.no) >= 0; }); }
@@ -332,7 +363,8 @@
     cur: cur, setCur: setCur, liveSessions: liveSessions, newSession: newSession, saveSession: saveSession, delSession: delSession,
     sections: sections, section: section, subs: subs, items: items, item: item, secName: secName,
     histBy: histBy, history: history, BANK: BANK, REMOTE: REMOTE,
-    twDoc: twDoc, setTwDoc: setTwDoc, todos: todos, todosFor: todosFor, todosGeneral: todosGeneral,
+    twDoc: twDoc, setTwDoc: setTwDoc, phDoc: phDoc, setPhDoc: setPhDoc,
+    clearImports: clearImports, importStat: importStat, exportState: exportState, importState: importState, todos: todos, todosFor: todosFor, todosGeneral: todosGeneral,
     todoDone: todoDone, setTodoDone: setTodoDone, todoStat: todoStat, mode: mode, setMode: setMode, isCustomer: isCustomer, customerOnly: customerOnly, resultOf: resultOf,
     result: result, setResult: setResult, findings: findings, findingsFor: findingsFor, newFinding: newFinding, saveFinding: saveFinding, delFinding: delFinding,
     progress: progress, addPhoto: addPhoto, photoSrc: photoSrc, imgSrc: imgSrc, pendingPhotos: pendingPhotos, flushPhotos: flushPhotos, apiPost: apiPost, apiGet: apiGet };
