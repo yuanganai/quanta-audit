@@ -123,10 +123,10 @@
     if (syncing) return;
     if (!REMOTE || !REMOTE.url || !navigator.onLine) { S.online = false; fire(false); return; }
     syncing = true;
-    apiGet('audit', 'data', function (ok, j) {
+    apiGet('preaudit', 'data', function (ok, j) {
       if (!ok) { syncing = false; S.online = false; fire(false); return; }
       mergeInto(S, j.data);
-      apiPost({ action: 'auditsave', data: payload(), by: by() }, function (ok2, j2) {
+      apiPost({ action: 'preauditsave', data: payload(), by: by() }, function (ok2, j2) {
         syncing = false;
         if (ok2) { if (j2 && j2.data) mergeInto(S, j2.data); S.online = true; S.dirty = false; S.lastSync = now(); saveLocal(); dedupeAuto(); fire(true); flushPhotos(); }
         else { S.online = false; saveLocal(); fire(false); }
