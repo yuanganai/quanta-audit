@@ -317,6 +317,12 @@ html[lang=en] .it .focus.open::after{content:'▴ Collapse'}
 .trow b{color:var(--navy)}
 .trow .cl{color:#8a8f99;font-size:10.5px}
 .trow .iz{flex:1;min-width:180px}
+.trow.nol{cursor:default;opacity:.92}
+.trow .nolink{font-size:10px;color:#8a4b0f;background:#fdf2e6;border-radius:7px;padding:1px 6px}
+a.trow:hover{box-shadow:0 1px 6px rgba(0,0,0,.12)}
+/* 由待辦／缺失清單直達某一條時，短暫高亮讓人看得出跳到哪 */
+.it.hl{animation:hlflash 2.6s ease-out}
+@keyframes hlflash{0%{box-shadow:0 0 0 3px var(--orange)}60%{box-shadow:0 0 0 3px var(--orange)}100%{box-shadow:0 0 0 0 rgba(237,125,49,0)}}
 .kt.sec td a{color:var(--navy);font-weight:600}
 .kt.sec tr.na{opacity:.6}
 .natag{font-size:9.5px;background:#eceef2;color:#6b7280;border-radius:7px;padding:0 5px}
