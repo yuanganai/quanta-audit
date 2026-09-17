@@ -79,8 +79,9 @@ table.kt tr:hover td{background:#f6f9ff}
 .tabs button{flex:1;border:1.5px solid #cdd6e6;background:#fff;border-radius:9px;padding:8px 6px;font-size:13.5px;font-weight:700;color:#556;cursor:pointer}
 .tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 .tabs button small{display:block;font-size:10.5px;font-weight:400;opacity:.85}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch}
-.chips button{flex:0 0 auto;border:1.5px solid #cdd6e6;background:#fff;border-radius:18px;padding:5px 11px;font-size:12px;font-weight:700;color:#556;cursor:pointer;white-space:nowrap}
+/* 15 章一次全部看到：原本橫向捲動只露出前 6 個，使用者會以為只有 6 章 */
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 8px}
+.chips button{flex:0 0 auto;border:1.5px solid #cdd6e6;background:#fff;border-radius:18px;padding:5px 10px;font-size:11.5px;font-weight:700;color:#556;cursor:pointer;white-space:nowrap}
 .chips button.on{background:var(--orange);color:#fff;border-color:var(--orange)}
 .chips button b{font-weight:800;margin-left:4px}
 .chips button .ng{color:var(--red)}.chips button.on .ng{color:#ffe1d6}
@@ -147,6 +148,13 @@ table.kt tr:hover td{background:#f6f9ff}
 .chips button.na{opacity:.62}
 .chips button u{display:inline-block;margin-left:4px;font-size:9.5px;text-decoration:none;background:#eceef2;color:#6b7280;border-radius:7px;padding:0 4px}
 .chips button.on u{background:rgba(255,255,255,.25);color:#fff}
+/* 窄螢幕：15 顆章節 chip 用兩欄排，名稱過長就省略，避免排成十幾行佔滿畫面 */
+@media(max-width:560px){
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .chips button{flex:initial;display:flex;align-items:center;gap:3px;padding:5px 8px;font-size:11px;min-width:0;white-space:nowrap}
+  .chips button .nm{overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .chips button b{margin-left:auto;flex:0 0 auto}
+}
 
 .it .dtags{margin-top:4px}
 .it .dt{display:inline-block;font-size:10px;font-weight:700;border-radius:8px;padding:1px 7px;margin:2px 4px 0 0}
