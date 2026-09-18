@@ -235,7 +235,8 @@
   /* TW 對應文件可在站上直接補填／修改，存 custom.tw（伺服器端同樣依 ts 新者勝） */
   function twDoc(iid) {
     var o = cRec('tw:' + iid), it = item(iid);
-    if (o && o.doc != null && !o.del) return { doc: o.doc, edited: true, by: o.by, ts: o.ts };
+    // 空白覆寫不蓋原文（2026-09-18 雲端曾殘留 tw:7.1／9.1 空字串，把自評表原填藏起來）
+    if (o && o.doc != null && !o.del && String(o.doc).trim()) return { doc: o.doc, edited: true, by: o.by, ts: o.ts };
     return { doc: (it && it.tw && it.tw.doc) || '', edited: false, src: (it && it.tw && it.tw.src) || '' };
   }
   function setTwDoc(iid, doc) { cPut('tw:' + iid, 'tw', { doc: doc }); }
