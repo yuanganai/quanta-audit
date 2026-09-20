@@ -335,7 +335,8 @@
     return who === 'cust' ? { r: o.cr || '', note: o.cnote || '', by: o.cby || '', ts: o.cts || 0 }
                           : { r: o.r || '', note: o.note || '', by: o.by || '', ts: o.sts || o.ts || 0 };
   }
-  function findings(sid) { return S.findings.filter(function (f) { return !f.del && (!sid || f.sid === sid); }); }
+  /* 客戶模式只看得到客戶自己開的缺失（自身缺失不揭露）— 總覽最新缺失／KPI／逐條查核徽章一併生效 */
+  function findings(sid) { var cu = isCustomer(); return S.findings.filter(function (f) { return !f.del && (!sid || f.sid === sid) && (!cu || (f.who || 'self') === 'cust'); }); }
   function findingsFor(sid, iid) { return findings(sid).filter(function (f) { return f.item === iid; }); }
   function newFinding(sid, iid) {
     var it = item(iid);
